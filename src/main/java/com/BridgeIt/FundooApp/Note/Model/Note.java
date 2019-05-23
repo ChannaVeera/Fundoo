@@ -1,6 +1,11 @@
 package com.BridgeIt.FundooApp.Note.Model;
 
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+
+import com.BridgeIt.FundooApp.Label.Model.Label;
 
 public class Note {
 	@Id
@@ -13,6 +18,9 @@ public class Note {
 	private boolean trash;
 	private boolean archive;
 	private boolean isPin;
+	
+	@DBRef
+	private List<Label>labels;
 	
 	public String getNoteId() {
 		return noteId;
@@ -65,9 +73,25 @@ public class Note {
 	public boolean isPin() {
 		return isPin;
 	}
+	
+	public List<Label> getLabels() {
+		return labels;
+	}
+	public void setLabels(List<Label> labels) {
+		this.labels = labels;
+	}
 	public void setPin(boolean isPin) {
 		this.isPin = isPin;
 	}
+	
+	@Override
+	public String toString() {
+		return "Note [noteId=" + noteId + ", userId=" + userId + ", title=" + title + ", description=" + description
+				+ ", createTime=" + createTime + ", updateTime=" + updateTime + ", trash=" + trash + ", archive="
+				+ archive + ", isPin=" + isPin + ", labels=" + labels + "]";
+	}
+	
+	
 	/**
 	 * 
 	 */
@@ -84,9 +108,10 @@ public class Note {
 	 * @param trash
 	 * @param archive
 	 * @param isPin
+	 * @param labels
 	 */
 	public Note(String noteId, String userId, String title, String description, String createTime, String updateTime,
-			boolean trash, boolean archive, boolean isPin) {
+			boolean trash, boolean archive, boolean isPin, List<Label> labels) {
 		super();
 		this.noteId = noteId;
 		this.userId = userId;
@@ -97,7 +122,9 @@ public class Note {
 		this.trash = trash;
 		this.archive = archive;
 		this.isPin = isPin;
+		this.labels = labels;
 	}
+	
 	
 	
 

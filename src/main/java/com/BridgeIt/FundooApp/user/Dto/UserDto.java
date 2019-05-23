@@ -32,5 +32,34 @@ public class UserDto {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+	
+	
+	
+	@Override
+	public String toString() {
+		return "UserDto [name=" + name + ", emailId=" + emailId + ", phoneNumber=" + phoneNumber + ", password="
+				+ password + "]";
+	}
+	/**
+	 * 
+	 */
+	public UserDto() {
+	
+	}
+	/**
+	 * @param name
+	 * @param emailId
+	 * @param phoneNumber
+	 * @param password
+	 */
+	public UserDto(String name, String emailId, String phoneNumber, String password) {
+		super();
+		this.name = name;
+		this.emailId = emailId;
+		this.phoneNumber = phoneNumber;
+		this.password = password;
+	}
+	
+	
 
 }

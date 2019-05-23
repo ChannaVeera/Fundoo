@@ -19,6 +19,12 @@ public class NoteDto {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+	
+
+	@Override
+	public String toString() {
+		return "NoteDto [title=" + title + ", description=" + description + "]";
+	}
 
 	/**
 	 * 

@@ -1,8 +1,11 @@
 package com.BridgeIt.FundooApp.user.Model;
 
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.BridgeIt.FundooApp.Note.Model.Note;
 import com.mongodb.lang.NonNull;
 @Document
 public class User {
@@ -17,42 +20,44 @@ public class User {
 	private boolean isVarified;
 	@NonNull
 	private String token;
+	private List<Note>notes;
 	
 	
 	
 	
-	public String getToken() {
-		return token;
-	}
-	public void setToken(String token) {
-		this.token = token;
-	}
+	
 	//==================constructer==================\\
 	public User() {
 		super();
 	}
 	//=======\\
+
 	/**
-	 * @param userId
+	 * @param Id
 	 * @param name
 	 * @param emailId
+	 * @param phoneNumber
 	 * @param password
 	 * @param registerStamp
 	 * @param updateStamp
 	 * @param isVarified
+	 * @param token
+	 * @param notes
 	 */
-	public User(String userId, String name, String emailId, String password, String registerStamp, String updateStamp,
-			boolean isVarified) {
+	public User(String Id, String name, String emailId, String phoneNumber, String password, String registerStamp,
+			String updateStamp, boolean isVarified, String token, List<Note> notes) {
 		super();
-		this.userId = userId;
+		this.userId = Id;
 		this.name = name;
 		this.emailId = emailId;
+		this.phoneNumber = phoneNumber;
 		this.password = password;
 		this.registerStamp = registerStamp;
 		this.updateStamp = updateStamp;
 		this.isVarified = isVarified;
+		this.token = token;
+		this.notes = notes;
 	}
-
 	//=====================getters&setters====================\\
 	public String getUserId() {
 		return userId;
@@ -103,6 +108,24 @@ public class User {
 	}
 	public void setVarified(boolean isVarified) {
 		this.isVarified = isVarified;
+	}public List<Note> getNotes() {
+		return notes;
+	}
+	public void setNotes(List<Note> notes) {
+		this.notes = notes;
+	}
+	public String getToken() {
+		return token;
+	}
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	@Override
+	public String toString() {
+		return "User [userId=" + userId + ", name=" + name + ", emailId=" + emailId + ", phoneNumber=" + phoneNumber
+				+ ", password=" + password + ", registerStamp=" + registerStamp + ", updateStamp=" + updateStamp
+				+ ", isVarified=" + isVarified + ", token=" + token + ", notes=" + notes + "]";
 	}
 
 }
