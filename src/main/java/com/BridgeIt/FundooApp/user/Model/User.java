@@ -20,6 +20,7 @@ public class User {
 	private boolean isVarified;
 	@NonNull
 	private String token;
+	private String image;
 	private List<Note>notes;
 	
 	
@@ -119,6 +120,15 @@ public class User {
 	}
 	public void setToken(String token) {
 		this.token = token;
+	}
+	
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
 	}
 
 	@Override
