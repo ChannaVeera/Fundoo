@@ -75,7 +75,7 @@ public class UserServiceImpl implements IUserService {
 		}
 		
 	}
-	
+
 	public Response validateMail(String token) {
 		String id = TokenUtility.verifyToken(token);
 		Optional<User> user = userRepository.findById(id);
@@ -89,7 +89,7 @@ public class UserServiceImpl implements IUserService {
 		return response;
 		}
 		else {
-			System.out.println("decoding Problem");
+
 			Response response = ResponceUtilty.getResponse(204, "0", environment.getProperty("user.activate.unsuccess"));
 			return response;
 		}

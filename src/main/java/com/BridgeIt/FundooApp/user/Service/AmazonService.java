@@ -46,6 +46,7 @@ public class AmazonService {
 	@Value("${amazonProperties.secretKey}")
 	private String secretKey;
 
+	@SuppressWarnings("deprecation")
 	@PostConstruct
 	private void initializeAmazon() {
 		AWSCredentials credentials = new BasicAWSCredentials(this.accessKey, this.secretKey);
@@ -88,7 +89,7 @@ public class AmazonService {
 			return response;
 		}
 		Response response = ResponceUtilty.getResponse(204, "", environment.getProperty("aws.propic.successfull"));
-		return null;
+		return response;
 
 	}
 

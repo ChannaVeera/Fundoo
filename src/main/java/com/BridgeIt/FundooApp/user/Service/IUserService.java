@@ -9,8 +9,11 @@ import com.BridgeIt.FundooApp.user.Model.Response;
 
 public interface IUserService {
 	Response registeruser(UserDto userDto, HttpServletRequest requestUrl);
+
 	Response loginuser(LoginDto loginDto);
+
 	Response forgotpassword(LoginDto loginDto);
-	Response resetpassword(String token,ForgetPasswordDto forgotPassword) ;
+
+	Response resetpassword(String token, ForgetPasswordDto forgotPassword);
 
 }
