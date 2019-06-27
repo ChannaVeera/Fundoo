@@ -46,9 +46,10 @@ public class SeviceElasticSearchImpl implements IServiceElasticSearch
 
 	@Override
 	public String createNote(Note note) throws IOException {
-		@SuppressWarnings({ "unused", "unchecked" })
+	
+		@SuppressWarnings("unchecked")
 		Map<String , Object> documentMappper = objectMapper.convertValue(note, Map.class);
-		@SuppressWarnings("deprecation")
+	
 		IndexRequest indexRequest= new IndexRequest(INDEX,TYPE,note.getNoteId()).source(documentMappper);
         IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
 		 return indexResponse.getResult().name();
@@ -57,7 +58,6 @@ public class SeviceElasticSearchImpl implements IServiceElasticSearch
 	@Override
 	public Note findById(String id) throws Exception {
 
-        @SuppressWarnings("deprecation")
 		GetRequest getRequest = new GetRequest(INDEX, TYPE, id);
 
         GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
@@ -71,7 +71,7 @@ public class SeviceElasticSearchImpl implements IServiceElasticSearch
 	@Override
 	public String upDateNote(Note note) throws Exception {
 		Note notes=findById(note.getNoteId());
-		@SuppressWarnings("deprecation")
+
 		UpdateRequest updateRequest=new UpdateRequest(INDEX, TYPE, note.getNoteId());
 	
 		@SuppressWarnings("unchecked")
@@ -87,7 +87,7 @@ public class SeviceElasticSearchImpl implements IServiceElasticSearch
 
 	@Override
 	public String deleteNote(String id) throws IOException {
-		@SuppressWarnings("deprecation")
+
 		
 		DeleteRequest deleteRequest= new DeleteRequest(INDEX, TYPE, id);
 		  DeleteResponse response = client.delete(deleteRequest, RequestOptions.DEFAULT);

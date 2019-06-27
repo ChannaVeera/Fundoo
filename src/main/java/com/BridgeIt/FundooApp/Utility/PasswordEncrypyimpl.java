@@ -7,18 +7,18 @@ import org.springframework.stereotype.Component;
 import com.BridgeIt.FundooApp.user.Dto.LoginDto;
 import com.BridgeIt.FundooApp.user.Model.User;
 
-
-
 @Component
-public class EncryptUtil {
+public class PasswordEncrypyimpl implements IPasswordEncrypt {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
+	@Override
 	public String encryptPassword(String password) {
 		return passwordEncoder.encode(password);
 
 	}
 
+	@Override
 	public boolean ispassword(LoginDto loginDto, User user)
 
 	{

@@ -5,15 +5,16 @@ import javax.servlet.http.HttpServletRequest;
 import com.BridgeIt.FundooApp.user.Dto.ForgetPasswordDto;
 import com.BridgeIt.FundooApp.user.Dto.LoginDto;
 import com.BridgeIt.FundooApp.user.Dto.UserDto;
-import com.BridgeIt.FundooApp.user.Model.Response;
+
 
 public interface IUserService {
-	Response registeruser(UserDto userDto, HttpServletRequest requestUrl);
+	String registeruser(UserDto userDto, HttpServletRequest requestUrl);
 
-	Response loginuser(LoginDto loginDto);
+	String loginuser(LoginDto loginDto);
 
-	Response forgotpassword(LoginDto loginDto);
+	String forgotpassword(String email);
 
-	Response resetpassword(String token, ForgetPasswordDto forgotPassword);
+	String resetpassword(String token, ForgetPasswordDto forgotPassword);
 
+	String validateMail(String token);
 }

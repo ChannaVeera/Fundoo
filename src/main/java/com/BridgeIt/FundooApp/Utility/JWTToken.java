@@ -6,12 +6,6 @@ import java.util.Locale;
 
 import org.springframework.stereotype.Component;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.Claim;
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.auth0.jwt.interfaces.Verification;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -20,10 +14,10 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 @Component
 
-public class TokenUtility {
+public class JWTToken implements ITokenGenerator {
 	private static final String secretkey = "qwertyuiop123";
 
-//	@Override
+	@Override
 	public String generateToken(String userId) {
 		Calendar cal = Calendar.getInstance(Locale.US);
 		Calendar cal1 = Calendar.getInstance(Locale.US);
@@ -35,8 +29,8 @@ public class TokenUtility {
 		return token;
 	}
 
-//	@Override
-	public String verifyToken(String token) {
+ @Override
+	public  String verifyToken(String token) {
 		Jws<Claims> claims = Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token);
 		String userId = claims.getBody().getId();
 		return userId;

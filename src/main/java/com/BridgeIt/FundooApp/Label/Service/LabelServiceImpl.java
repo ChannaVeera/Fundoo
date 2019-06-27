@@ -12,11 +12,8 @@ import org.springframework.stereotype.Service;
 import com.BridgeIt.FundooApp.Label.Dto.LabelDto;
 import com.BridgeIt.FundooApp.Label.Model.Label;
 import com.BridgeIt.FundooApp.Label.Repository.ILabelRepository;
-//import com.BridgeIt.FundooApp.Note.Dto.NoteDto;
-//import com.BridgeIt.FundooApp.Note.Model.Note;
-//import com.BridgeIt.FundooApp.Note.Respository.INoteRepository;
+import com.BridgeIt.FundooApp.Utility.ITokenGenerator;
 import com.BridgeIt.FundooApp.Utility.ResponceUtilty;
-import com.BridgeIt.FundooApp.Utility.TokenUtility;
 import com.BridgeIt.FundooApp.Utility.Utility;
 import com.BridgeIt.FundooApp.user.Model.Response;
 import com.BridgeIt.FundooApp.user.Model.User;
@@ -32,13 +29,14 @@ public class LabelServiceImpl implements ILabelService {
 //	private INoteRepository iNoteRepository;
 	@Autowired
 	private ILabelRepository iLableRepository;
-
+	@Autowired
+	private ITokenGenerator iTokenGenerator;
 	@Autowired
 	private IUserRespository iUserRespository;
 
 	@Override
 	public Response createLable(String token, LabelDto labelDto) {
-		String id = TokenUtility.verifyToken(token);
+		String id = iTokenGenerator.verifyToken(token);
 		Optional<User> user = iUserRespository.findByUserId(id);
 		if (user.isPresent()) {
 
@@ -58,7 +56,7 @@ public class LabelServiceImpl implements ILabelService {
 
 	@Override
 	public Response updateLable(LabelDto labelDto, String lableId, String token) {
-		String userid = TokenUtility.verifyToken(token);
+		String userid = iTokenGenerator.verifyToken(token);
 		Optional<Label> label = iLableRepository.findByLabelIdAndUserId(lableId, userid);
 		if (label.isPresent()) {
 			label.get().setLableName(labelDto.getLableName());
@@ -74,7 +72,7 @@ public class LabelServiceImpl implements ILabelService {
 
 	@Override
 	public Response deleteLable(String token, String lableId) {
-		String userId = TokenUtility.verifyToken(token);
+		String userId = iTokenGenerator.verifyToken(token);
 		Optional<Label> lable = iLableRepository.findByLabelIdAndUserId(lableId, userId);
 		if (lable.isPresent()) {
 			lable.get().setUpdateTime(Utility.todayDate());
@@ -82,14 +80,15 @@ public class LabelServiceImpl implements ILabelService {
 			Response response = ResponceUtilty.getResponse(200, "", environment.getProperty("label.delete.success "));
 			return response;
 		} else {
-			Response response = ResponceUtilty.getResponse(204, " ", environment.getProperty("label.Unsuccessfull.delete"));
+			Response response = ResponceUtilty.getResponse(204, " ",
+					environment.getProperty("label.Unsuccessfull.delete"));
 			return response;
 		}
 	}
 
 	@Override
 	public List<LabelDto> getLabel(String token) {
-		String userId = TokenUtility.verifyToken(token);
+		String userId = iTokenGenerator.verifyToken(token);
 		List<Label> labels = iLableRepository.findByUserId(userId);
 		List<LabelDto> labelList = new ArrayList<LabelDto>();
 		for (Label label : labels) {
@@ -99,6 +98,5 @@ public class LabelServiceImpl implements ILabelService {
 		}
 		return labelList;
 	}
-
 
 }

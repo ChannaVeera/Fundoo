@@ -1,4 +1,4 @@
-package com.BridgeIt.FundooApp.user.Model;
+package com.BridgeIt.FundooApp.Utility;
 
 public class Email {
 	private String emailId;

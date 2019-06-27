@@ -15,8 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.BridgeIt.FundooApp.Note.Dto.NoteDto;
 import com.BridgeIt.FundooApp.Note.Servise.NoteServiseImpl;
+import com.BridgeIt.FundooApp.response.Response;
 
-import com.BridgeIt.FundooApp.user.Model.Response;
+
 
 @RestController
 @RequestMapping("/note")
@@ -26,14 +27,16 @@ public class NoteController {
 
 	@PostMapping("/create")
 	public ResponseEntity<Response> createNote(@RequestBody NoteDto noteDto, @RequestHeader String token) {
-		Response response = noteServiseImpl.createNote(noteDto, token);
+	String messege = noteServiseImpl.createNote(noteDto, token);
+	Response response = new Response(HttpStatus.OK.value(), messege, "");
 		return new ResponseEntity<Response>(response, HttpStatus.OK);
 	}
 	@PostMapping("/update")
 	public ResponseEntity<Response> updateNote(@RequestBody NoteDto noteDto, @RequestHeader String token,
 			@RequestParam(value="noteId") String noteId) 
 	{
-		Response response = noteServiseImpl.updateNote(noteDto, token, noteId);
+		String message = noteServiseImpl.updateNote(noteDto, token, noteId);
+		Response response= new Response(HttpStatus.OK.value(), message, "");
 		return new ResponseEntity<Response>(response,HttpStatus.OK);
 	}
 	@PostMapping("/delete")

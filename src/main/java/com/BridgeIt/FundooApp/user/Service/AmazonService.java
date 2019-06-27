@@ -13,9 +13,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-
+import com.BridgeIt.FundooApp.Utility.ITokenGenerator;
 import com.BridgeIt.FundooApp.Utility.ResponceUtilty;
-import com.BridgeIt.FundooApp.Utility.TokenUtility;
+
 import com.BridgeIt.FundooApp.user.Model.Response;
 import com.BridgeIt.FundooApp.user.Model.User;
 import com.BridgeIt.FundooApp.user.Respository.IUserRespository;
@@ -34,6 +34,8 @@ public class AmazonService {
 	IUserRespository userRespository;
 	@Autowired
 	private Environment environment;
+	@Autowired
+	private ITokenGenerator tokenGenerator;
 
 	private AmazonS3 s3client;
 
@@ -72,7 +74,7 @@ public class AmazonService {
 	}
 
 	public Response uploadFile(MultipartFile multipartFile, String token) throws IOException {
-		String id = TokenUtility.verifyToken(token);
+		String id = tokenGenerator.verifyToken(token);
 		Optional<User> optionaluser = userRespository.findByUserId(id);
 		if (optionaluser.isPresent()) {
 			User user = optionaluser.get();
@@ -96,7 +98,7 @@ public class AmazonService {
 	public Response deleteFileFromS3Bucket(String fileName, String token) {
 
 //	    String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
-		String id = TokenUtility.verifyToken(token);
+		String id = tokenGenerator.verifyToken(token);
 		Optional<User> optionalUser = userRespository.findByUserId(id);
 		if (optionalUser.isPresent()) {
 			User user = optionalUser.get();

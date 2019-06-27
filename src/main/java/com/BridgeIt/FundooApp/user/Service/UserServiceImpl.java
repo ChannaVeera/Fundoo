@@ -1,8 +1,5 @@
 package com.BridgeIt.FundooApp.user.Service;
 
-
-import java.util.Optional;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.modelmapper.ModelMapper;
@@ -11,18 +8,17 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import com.BridgeIt.FundooApp.Utility.EncryptUtil;
+import com.BridgeIt.FundooApp.Utility.Email;
+
+import com.BridgeIt.FundooApp.Utility.IPasswordEncrypt;
+import com.BridgeIt.FundooApp.Utility.ITokenGenerator;
 import com.BridgeIt.FundooApp.Utility.MailService;
-import com.BridgeIt.FundooApp.Utility.ResponceUtilty;
-import com.BridgeIt.FundooApp.Utility.TokenUtility;
+
 import com.BridgeIt.FundooApp.Utility.Utility;
+import com.BridgeIt.FundooApp.exception.UserException;
 import com.BridgeIt.FundooApp.user.Dto.ForgetPasswordDto;
-
 import com.BridgeIt.FundooApp.user.Dto.LoginDto;
-
 import com.BridgeIt.FundooApp.user.Dto.UserDto;
-import com.BridgeIt.FundooApp.user.Model.Email;
-import com.BridgeIt.FundooApp.user.Model.Response;
 import com.BridgeIt.FundooApp.user.Model.User;
 import com.BridgeIt.FundooApp.user.Respository.IUserRespository;
 
@@ -33,25 +29,27 @@ public class UserServiceImpl implements IUserService {
 	private IUserRespository userRepository;
 	@Autowired
 	private ModelMapper modelMapper;
-	
+	@Autowired
+	private ITokenGenerator tokengenerator;
 	@Autowired
 	private MailService emailSender;
 	@Autowired
-	private EncryptUtil encryptUtil;
+	private IPasswordEncrypt encryptUtil;
 	@Autowired
 	private Environment environment;
 
-	public Response registeruser(UserDto userDto, HttpServletRequest request) {
+	@Override
+	public String registeruser(UserDto userDto, HttpServletRequest request) {
 		System.out.println(request);
 		Email email = new Email();
 		boolean isemail = userRepository.findByEmailId(userDto.getEmailId()).isPresent();
-		
+
 		if (isemail) {
-			Response response = ResponceUtilty.getResponse(204, "0", environment.getProperty("user.register.failuer"));
-			return response;
+			throw new UserException(environment.getProperty("user.register.failuer"));
+
 		} else {
 			User user = modelMapper.map(userDto, User.class);
-			String token = TokenUtility.generateToken(user.getUserId());
+			String token = tokengenerator.generateToken(user.getUserId());
 			user.setPassword(encryptUtil.encryptPassword(userDto.getPassword()));
 			user.setToken(token);
 			user.setRegisterStamp(Utility.todayDate());
@@ -62,112 +60,68 @@ public class UserServiceImpl implements IUserService {
 			email.setSubject("verification");
 			email.setBody("Body");
 			try {
-				email.setBody(
-						emailSender.getlink("http://localhost:9090/users/activation/",status.getUserId()));
+				email.setBody(emailSender.getlink("http://localhost:9090/users/activation/", status.getUserId()));
 
 			} catch (Exception e) {
-				// TODO: handle exception
+
 			}
 			emailSender.send(email);
+			return environment.getProperty("user.register.success");
 
-			Response response = ResponceUtilty.getResponse(200, token, environment.getProperty("user.register.success "));
-			return response;
 		}
-		
+
 	}
 
-	public Response validateMail(String token) {
-		String id = TokenUtility.verifyToken(token);
-		Optional<User> user = userRepository.findById(id);
-		//Optional<User> user = userRepository.findById(id);
-		if(user.isPresent()) {
-			user.get().setToken(token);
-			user.get().setVarified(true);
-			user.get().setUpdateStamp(Utility.todayDate());
-			userRepository.save(user.get());
-		Response response = ResponceUtilty.getResponse(200,"0", environment.getProperty("user.activate.success"));
-		return response;
-		}
-		else {
-
-			Response response = ResponceUtilty.getResponse(204, "0", environment.getProperty("user.activate.unsuccess"));
-			return response;
-		}
-		
+	public String validateMail(String token) {
+		String id = tokengenerator.verifyToken(token);
+		User user = userRepository.findById(id).orElseThrow(() -> new UserException("user.activate.unsuccess"));
+		user.setVarified(true);
+		user.setUpdateStamp(Utility.todayDate());
+		userRepository.save(user);
+		return environment.getProperty("user.activate.success");
 	}
-
-
 
 	@Override
-	public Response loginuser(LoginDto loginDto) {
-		boolean isemail = userRepository.findByEmailId(loginDto.getEmailId()).isPresent();
-		{
-			if (!isemail) {
-				Response response = ResponceUtilty.getResponse(204, "0",environment.getProperty("user.login.unsuccess"));
-				return response;
-			}
-			User user = userRepository.findByEmailId(loginDto.getEmailId()).get();
-			//String token = TokenUtility.generateToken(user.getUserId());
-			boolean ispassword = encryptUtil.ispassword(loginDto, user);
-			if (!ispassword) {
-				Response response = ResponceUtilty.getResponse(200, "0", environment.getProperty("user.login.success"));
-				return response;
-			}
+	public String loginuser(LoginDto loginDto) {
+		String token = null;
+		User user = userRepository.findByEmailId(loginDto.getEmailId())
+				.orElseThrow(() -> new UserException(environment.getProperty("user.login.unsuccess")));
+		boolean ispassword = encryptUtil.ispassword(loginDto, user);
+		if (ispassword && user.isVarified()) {
+			token = tokengenerator.generateToken(user.getUserId());
 			user.setUpdateStamp(Utility.todayDate());
 			userRepository.save(user);
-			Response response = ResponceUtilty.getResponse(204, "0", environment.getProperty("user.login.unsuccess"));
-			return response;
-		}
-
-	}
-
-
-	@Override
-	public Response forgotpassword(LoginDto loginDto) {
-		Email email = new Email();
-		Optional<User> user = userRepository.findByEmailId(loginDto.getEmailId());
-		if (user.isPresent()) {
-			
-			email.setEmailId("nk8790525589@gmail.com");
-			email.setTo(loginDto.getEmailId());
-			email.setSubject("ChangeLink");
-			try {
-				email.setBody(emailSender.getlink("http://localhost:9090/users/restPassword/", user.get().getToken()));
-
-			} catch (Exception e) {
-			}
-			emailSender.send(email);
-			Response response = ResponceUtilty.getResponse(200, "0",environment.getProperty("user.forget.password"));
-			return response;
+			return token;
 		} else {
-			Response response = ResponceUtilty.getResponse(204, "0",environment.getProperty("user.forget.password.fail"));
-			return response;
+			throw new UserException(environment.getProperty("user.valid.password"));
 		}
-		
 
 	}
 
 	@Override
-	public Response resetpassword(String token, ForgetPasswordDto forgotPassword) {
-		Response response = null;
-		String id = TokenUtility.verifyToken(token);
-		
-		System.out.println(forgotPassword.getPassword());
-		Optional<User> user = userRepository.findById(id);
-		if (user.isPresent()) {
-	
-				user.get().setPassword(encryptUtil.encryptPassword(forgotPassword.getPassword()));
-				user.get().setUpdateStamp(Utility.todayDate());
-				userRepository.save(user.get());
-				response = ResponceUtilty.getResponse(200, token, environment.getProperty("user.restpassword.change"));
-				return response;
+	public String forgotpassword(String emailId) {
+		Email email = new Email();
+		User user = userRepository.findByEmailId(emailId)
+				.orElseThrow(() -> new UserException(environment.getProperty("user.forget.password.fail")));
+		email.setEmailId("nk8790525589@gmail.com");
+		email.setTo(emailId);
+		email.setSubject("ChangeLink");
+		try {
+			email.setBody(emailSender.getlink("http://localhost:9090/users/restPassword/", user.getUserId()));
+		} catch (Exception e) {
 		}
-		else {
-			
-		
-			response = ResponceUtilty.getResponse(500, "0", environment.getProperty("user.restpassword.changeInfo"));
-		
-		return response;
-		}
+		emailSender.send(email);
+		return environment.getProperty("user.forget.password");
+
+	}
+
+	@Override
+	public String resetpassword(String token, ForgetPasswordDto forgotPassword) {
+		String id = tokengenerator.verifyToken(token);
+		User user = userRepository.findById(id).orElseThrow(() -> new UserException("user.restpassword.changeInfo"));
+		user.setPassword(encryptUtil.encryptPassword(forgotPassword.getPassword()));
+		user.setUpdateStamp(Utility.todayDate());
+		userRepository.save(user);
+		return environment.getProperty("user.restpassword.change");
 	}
 }
