@@ -13,16 +13,16 @@ import com.BridgeIt.FundooApp.response.Response;
 public class NoteExceptionHandler {
 
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Response> handleException(String message)
+	public ResponseEntity<Response> handleException(Exception ex)
 	{
-		Response response=new Response(HttpStatus.INTERNAL_SERVER_ERROR.value(), message, null);
+		Response response=new Response(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage(), null);
 		return new  ResponseEntity<Response>(response,HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
 	@ExceptionHandler(NoteException.class)
-	public ResponseEntity<Response> handleNoteException(RuntimeException runtimeException)
+	public ResponseEntity<Response> handleNoteException(NoteException noteException)
 	{
-		Response response=new Response(HttpStatus.BAD_REQUEST.value(), runtimeException.getMessage(), null);
+		Response response=new Response(HttpStatus.BAD_REQUEST.value(), noteException.getMessage(), null);
 		return new ResponseEntity<Response>(response,HttpStatus.BAD_REQUEST);
 				
 	}

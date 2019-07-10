@@ -14,9 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.BridgeIt.FundooApp.Utility.ITokenGenerator;
-import com.BridgeIt.FundooApp.Utility.ResponceUtilty;
-
-import com.BridgeIt.FundooApp.user.Model.Response;
+import com.BridgeIt.FundooApp.exception.UserException;
 import com.BridgeIt.FundooApp.user.Model.User;
 import com.BridgeIt.FundooApp.user.Respository.IUserRespository;
 import com.amazonaws.auth.AWSCredentials;
@@ -73,43 +71,73 @@ public class AmazonService {
 				new PutObjectRequest(bucketName, fileName, file).withCannedAcl(CannedAccessControlList.PublicRead));
 	}
 
-	public Response uploadFile(MultipartFile multipartFile, String token) throws IOException {
+	public String uploadFile(MultipartFile multipartFile, String token) throws IOException {
 		String id = tokenGenerator.verifyToken(token);
 		Optional<User> optionaluser = userRespository.findByUserId(id);
-		if (optionaluser.isPresent()) {
-			User user = optionaluser.get();
+		 return optionaluser.filter(user->{
+			return user!=null;
+		}).map(user->{
+		
 			String fileUrl = "";
-			File file = convertMultiPartToFile(multipartFile);
+			File file=null;
+			try {
+				file = convertMultiPartToFile(multipartFile);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 			String fileName = generateFileName(multipartFile);
 			fileUrl = endpointUrl + "/" + bucketName + "/" + fileName;
 			uploadFileTos3bucket(fileName, file);
 			file.delete();
 			user.setImage(fileUrl);
 			userRespository.save(user);
-			Response response = ResponceUtilty.getResponse(200, token,
-					environment.getProperty("aws.propic.successfull"));
-			return response;
-		}
-		Response response = ResponceUtilty.getResponse(204, "", environment.getProperty("aws.propic.successfull"));
-		return response;
+			return environment.getProperty("aws.propic.successfull");
+		}).orElseThrow(()-> new UserException(environment.getProperty("aws.propic.successfull")));
+//		if (optionaluser.isPresent()) {
+//			User user = optionaluser.get();
+//			String fileUrl = "";
+//			File file = convertMultiPartToFile(multipartFile);
+//			String fileName = generateFileName(multipartFile);
+//			fileUrl = endpointUrl + "/" + bucketName + "/" + fileName;
+//			uploadFileTos3bucket(fileName, file);
+//			file.delete();
+//			user.setImage(fileUrl);
+//			userRespository.save(user);
+//			Response response = ResponceUtilty.getResponse(200, token,
+//					environment.getProperty("aws.propic.successfull"));
+//			return response;
+//		}
+//		Response response = ResponceUtilty.getResponse(204, "", environment.getProperty("aws.propic.successfull"));
+//		return response;
 
 	}
 
-	public Response deleteFileFromS3Bucket(String fileName, String token) {
+	public String deleteFileFromS3Bucket(String fileName, String token) {
 
-//	    String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+
 		String id = tokenGenerator.verifyToken(token);
 		Optional<User> optionalUser = userRespository.findByUserId(id);
-		if (optionalUser.isPresent()) {
-			User user = optionalUser.get();
+	 return 	optionalUser.filter(user->{
+			return user!=null;
+		}).map(user->{
 			s3client.deleteObject(new DeleteObjectRequest(bucketName, fileName));
 			user.setImage(null);
 			userRespository.save(user);
-			Response response = ResponceUtilty.getResponse(200, token, environment.getProperty("aws.propic.delete.successfull"));
-			return response;
-		}
-		Response response = ResponceUtilty.getResponse(204, "0", environment.getProperty("aws.propic.delete.failuer"));
-		return response;
+			return  environment.getProperty("aws.propic.delete.successfull");
+		}).orElseThrow(()-> new UserException(environment.getProperty("aws.propic.delete.failuer")));
 	}
+//		if (optionalUser.isPresent()) {
+//			User user = optionalUser.get();
+//			s3client.deleteObject(new DeleteObjectRequest(bucketName, fileName));
+//			user.setImage(null);
+//			userRespository.save(user);
+//			Response response = ResponceUtilty.getResponse(200, token, environment.getProperty("aws.propic.delete.successfull"));
+//			return response;
+//		}
+//		Response response = ResponceUtilty.getResponse(204, "0", environment.getProperty("aws.propic.delete.failuer"));
+//		return response;
+//	}
 
 }

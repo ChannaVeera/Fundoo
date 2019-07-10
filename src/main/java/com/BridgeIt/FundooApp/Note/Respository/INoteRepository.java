@@ -10,5 +10,6 @@ import com.BridgeIt.FundooApp.Note.Model.Note;
 @Repository
 public interface INoteRepository extends MongoRepository<Note, String> {
 	Optional<Note> findByNoteIdAndUserId(String noteId,String userId); 
+	List<Note> findByUserIdAndLabelsLableName(String userId,String labelname);
 	List<Note> findByUserId(String userId);
 }

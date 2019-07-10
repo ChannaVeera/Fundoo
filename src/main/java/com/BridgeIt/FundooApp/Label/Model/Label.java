@@ -15,7 +15,7 @@ public class Label {
 	private String userId;
 	private String createTime;
 	private String updateTime;
-	private List<Note> notes;
+
 	public String getLabelId() {
 		return labelId;
 	}
@@ -56,13 +56,7 @@ public class Label {
 		this.updateTime = updateTime;
 	}
 
-	public List<Note> getNotes() {
-		return notes;
-	}
 
-	public void setNotes(List<Note> notes) {
-		this.notes = notes;
-	}
 
 	@Override
 	public String toString() {
@@ -82,7 +76,7 @@ public class Label {
 	 * @param userId
 	 * @param createTime
 	 * @param updateTime
-	 * @param notes
+
 	 */
 	public Label(String labelId, String lableName, String userId, String createTime, String updateTime,
 			List<Note> notes) {
@@ -92,7 +86,7 @@ public class Label {
 		this.userId = userId;
 		this.createTime = createTime;
 		this.updateTime = updateTime;
-		this.notes = notes;
+
 	}
 
 	

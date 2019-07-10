@@ -1,6 +1,5 @@
 package com.BridgeIt.FundooApp.Label.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,9 +12,11 @@ import com.BridgeIt.FundooApp.Label.Dto.LabelDto;
 import com.BridgeIt.FundooApp.Label.Model.Label;
 import com.BridgeIt.FundooApp.Label.Repository.ILabelRepository;
 import com.BridgeIt.FundooApp.Utility.ITokenGenerator;
-import com.BridgeIt.FundooApp.Utility.ResponceUtilty;
+
 import com.BridgeIt.FundooApp.Utility.Utility;
-import com.BridgeIt.FundooApp.user.Model.Response;
+import com.BridgeIt.FundooApp.exception.LabelException;
+import com.BridgeIt.FundooApp.exception.UserException;
+
 import com.BridgeIt.FundooApp.user.Model.User;
 import com.BridgeIt.FundooApp.user.Respository.IUserRespository;
 
@@ -25,8 +26,6 @@ public class LabelServiceImpl implements ILabelService {
 	private ModelMapper modelMapper;
 	@Autowired
 	private Environment environment;
-//	@Autowired
-//	private INoteRepository iNoteRepository;
 	@Autowired
 	private ILabelRepository iLableRepository;
 	@Autowired
@@ -35,68 +34,57 @@ public class LabelServiceImpl implements ILabelService {
 	private IUserRespository iUserRespository;
 
 	@Override
-	public Response createLable(String token, LabelDto labelDto) {
+	public String createLable(String token, LabelDto labelDto) {
 		String id = iTokenGenerator.verifyToken(token);
-		Optional<User> user = iUserRespository.findByUserId(id);
-		if (user.isPresent()) {
-
-			User useris = iUserRespository.findById(id).get();
+		Optional<User> optionalUser = iUserRespository.findByUserId(id);
+		return optionalUser.filter(user -> {
+			return user != null;
+		}).filter(label -> {
+			return labelDto.getLableName() != null;
+		}).map(user -> {
 			Label label = modelMapper.map(labelDto, Label.class);
-			label.setUserId(useris.getUserId());
+			label.setUserId(user.getUserId());
 			label.setCreateTime(Utility.todayDate());
 			label.setUpdateTime(Utility.todayDate());
 			iLableRepository.save(label);
-			Response response = ResponceUtilty.getResponse(200, "", environment.getProperty("label.create.success"));
-			return response;
-		} else {
-			Response response = ResponceUtilty.getResponse(204, "0", environment.getProperty("label.create.unsuccess"));
-			return response;
-		}
-	}
+			return environment.getProperty("label.create.success");
+		}).orElseThrow(() -> new UserException(environment.getProperty("user.not.found")));
+}
 
 	@Override
-	public Response updateLable(LabelDto labelDto, String lableId, String token) {
+	public String updateLable(LabelDto labelDto, String lableId, String token) {
 		String userid = iTokenGenerator.verifyToken(token);
-		Optional<Label> label = iLableRepository.findByLabelIdAndUserId(lableId, userid);
-		if (label.isPresent()) {
-			label.get().setLableName(labelDto.getLableName());
-			label.get().setUpdateTime(Utility.todayDate());
-			iLableRepository.save(label.get());
-			Response response = ResponceUtilty.getResponse(200, " ", environment.getProperty("label.update.success"));
-			return response;
-		} else {
-			Response response = ResponceUtilty.getResponse(204, "0", environment.getProperty("label.notFound"));
-			return response;
-		}
+		Optional<Label> optionalLabel = iLableRepository.findByLabelIdAndUserId(lableId, userid);
+		return optionalLabel.filter(label -> {
+			return label != null;
+		}).map(label -> {
+			label.setLableName(labelDto.getLableName());
+			label.setUpdateTime(Utility.todayDate());
+			iLableRepository.save(label);
+			return environment.getProperty("label.update.success");
+		}).orElseThrow(() -> new LabelException(environment.getProperty("label.notFound")));
+
 	}
 
 	@Override
-	public Response deleteLable(String token, String lableId) {
+	public String deleteLable(String token, String lableId) {
 		String userId = iTokenGenerator.verifyToken(token);
-		Optional<Label> lable = iLableRepository.findByLabelIdAndUserId(lableId, userId);
-		if (lable.isPresent()) {
-			lable.get().setUpdateTime(Utility.todayDate());
-			iLableRepository.delete(lable.get());
-			Response response = ResponceUtilty.getResponse(200, "", environment.getProperty("label.delete.success "));
-			return response;
-		} else {
-			Response response = ResponceUtilty.getResponse(204, " ",
-					environment.getProperty("label.Unsuccessfull.delete"));
-			return response;
-		}
+		Optional<Label> optionalLable = iLableRepository.findByLabelIdAndUserId(lableId, userId);
+		return optionalLable.filter(lable -> {
+			return lable != null;
+		}).map(lable -> {
+			lable.setUpdateTime(Utility.todayDate());
+			iLableRepository.delete(lable);
+			return environment.getProperty("label.delete.success ");
+		}).orElseThrow(() -> new LabelException(environment.getProperty("label.Unsuccessfull.delete")));
+
 	}
 
 	@Override
-	public List<LabelDto> getLabel(String token) {
+	public List<Label> getLabel(String token) {
 		String userId = iTokenGenerator.verifyToken(token);
 		List<Label> labels = iLableRepository.findByUserId(userId);
-		List<LabelDto> labelList = new ArrayList<LabelDto>();
-		for (Label label : labels) {
-			LabelDto lableslist = modelMapper.map(label, LabelDto.class);
-			labelList.add(lableslist);
-			System.out.println(lableslist);
-		}
-		return labelList;
+		return labels;
 	}
 
 }
