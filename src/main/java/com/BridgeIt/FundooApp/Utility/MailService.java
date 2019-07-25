@@ -1,11 +1,14 @@
 package com.BridgeIt.FundooApp.Utility;
 
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
 import org.springframework.stereotype.Component;
+
+import com.BridgeIt.FundooApp.user.Service.RabbitMqSender;
 
 @Component
 public class MailService implements IEmailService {
@@ -18,8 +21,12 @@ public class MailService implements IEmailService {
 	}
 
 	@Autowired
+	RabbitMqSender rabbitsender;
+	@Autowired
 	private ITokenGenerator iTokenGenerator;
+
 	@Override
+	@RabbitListener(queues = "note.queue")
 	public void send(Email emailid) {
 		System.out.println("Sending mail to receiver");
 		SimpleMailMessage message = new SimpleMailMessage();
@@ -31,6 +38,7 @@ public class MailService implements IEmailService {
 
 		System.out.println("email sent successfully");
 	}
+
 	@Override
 	public String getlink(String link, String id) {
 		return link + iTokenGenerator.generateToken(id);

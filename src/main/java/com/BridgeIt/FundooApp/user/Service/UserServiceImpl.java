@@ -39,6 +39,8 @@ public class UserServiceImpl implements IUserService {
 	private IPasswordEncrypt encryptUtil;
 	@Autowired
 	private Environment environment;
+	@Autowired 
+	private RabbitMqSender rabbitSender;
 
 	@Override
 	public String registeruser(UserDto userDto, HttpServletRequest request) {
@@ -59,7 +61,8 @@ public class UserServiceImpl implements IUserService {
 			email.setTo(user.getEmailId());
 			email.setSubject("verification");
 			email.setBody("Body\n" + "http://localhost:9090/users/activation/" + token);
-			emailSender.send(email);
+			rabbitSender.send(email);
+			//emailSender.send(email);
 			return environment.getProperty("user.register.success");
 		}
 	}

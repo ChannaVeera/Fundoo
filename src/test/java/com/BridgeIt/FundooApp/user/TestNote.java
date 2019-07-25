@@ -1,15 +1,16 @@
 package com.BridgeIt.FundooApp.user;
 
-import static org.junit.Assert.*;
+//import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+//import org.mockito.Mockito;
 
 import com.BridgeIt.FundooApp.Utility.JWTToken;
 
-public class TestNote {
+public class TestNote {//import org.mockito.Mockito;
+
 	
 	
 	@Mock
